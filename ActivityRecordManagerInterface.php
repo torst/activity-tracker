@@ -12,6 +12,7 @@ namespace UCS\Component\ActivityTracker;
 
 /* Imports */
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * Default record manager interface
@@ -26,6 +27,28 @@ interface ActivityRecordManagerInterface
      * @return ActivityRecordInterface
      */
     public function createRecord();
+
+    /**
+     * Create a new record
+     *
+     * @param string        $title  
+     * @param string        $content
+     * @param UserInterface $user
+     *
+     * @return ActivityRecord
+     */
+    public function record($title, $content, UserInterface $user = null);
+
+    /**
+     * Create a new record from the given title and content
+     *
+     * @param string        $title  
+     * @param string        $content
+     * @param UserInterface $user
+     *
+     * @return ActivityRecord
+     */
+    public function createRecordFrom($title, $content, UserInterface $user = null);
 
     /**
      * Deletes a record.

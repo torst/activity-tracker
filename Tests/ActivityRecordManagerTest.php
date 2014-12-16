@@ -21,15 +21,10 @@ use UCS\Component\ActivityTracker\ActivityRecord;
 class ActivityRecordManagerTest extends \PHPUnit_Framework_TestCase
 {
     protected $instance;
-    protected $securityContext;
 
     protected function setup()
     {
-        $this->securityContext = $this->getMock('Symfony\Component\Security\Core\SecurityContextInterface');
         $this->instance = $this->getMockBuilder('UCS\Component\ActivityTracker\ActivityRecordManager')
-            ->setConstructorArgs(array(
-                $this->securityContext,
-            ))
             ->getMockForAbstractClass();
     }
 
@@ -145,20 +140,11 @@ class ActivityRecordManagerTest extends \PHPUnit_Framework_TestCase
         $this->instance->expects($this->once())
           ->method('getClass')
           ->will($this->returnValue('UCS\Component\ActivityTracker\ActivityRecord'));
-
-        $token = $this->getMock('Symfony\Component\Security\Core\Authentication\Token\TokenInterface');
+        
         $user = $this->getMock('Symfony\Component\Security\Core\User\UserInterface');
 
-        $token->expects($this->any())
-            ->method('getUser')
-            ->will($this->returnValue($user));
-
-        $this->securityContext->expects($this->any())
-            ->method('getToken')
-            ->will($this->returnValue($token));
-
         $date = new \DateTime();
-        $record = $this->instance->record('title', 'foo');
+        $record = $this->instance->record('title', 'foo', $user);
 
         $this->assertEquals('title', $record->getTitle());
         $this->assertEquals('foo', $record->getContent());

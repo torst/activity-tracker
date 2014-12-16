@@ -12,7 +12,7 @@ namespace UCS\Component\ActivityTracker;
 
 /* Imports */
 use Doctrine\Common\Collections\Collection;
-use Symfony\Component\Security\Core\SecurityContextInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /* Local Imports */
 use UCS\Component\ActivityTracker\Exception\UnsupportedRecordException;
@@ -27,32 +27,12 @@ use UCS\Component\ActivityTracker\Exception\RecordNotFoundException;
 abstract class ActivityRecordManager implements ActivityRecordManagerInterface
 {
     /**
-     * @var SecurityContextInterface
+     * {@inheritdoc}
      */
-    protected $securityContext;
-
-    /**
-     * Constructor
-     *
-     * @param SecurityContextInterface $securityContext
-     */
-    public function __construct(SecurityContextInterface $securityContext)
-    {
-        $this->securityContext = $securityContext;
-    }
-
-    /**
-     * Create a new record
-     *
-     * @param string $title  
-     * @param string $content
-     *
-     * @return ActivityRecord
-     */
-    public function record($title, $content)
+    public function record($title, $content, UserInterface $user = null)
     {
         $record = $this->createRecord();
-        $record->setUser($this->securityContext->getToken()->getUser())
+        $record->setUser($user)
             ->setCreatedAt(new \DateTime())
             ->setTitle($title)
             ->setContent($content);
@@ -63,17 +43,12 @@ abstract class ActivityRecordManager implements ActivityRecordManagerInterface
     }
 
     /**
-     * Create a new record from the given title and content
-     *
-     * @param string $title  
-     * @param string $content
-     *
-     * @return ActivityRecord
+     * {@inheritdoc}
      */
-    public function createRecordFrom($title, $content)
+    public function createRecordFrom($title, $content, UserInterface $user = null)
     {
         $record = $this->createRecord();
-        $record->setUser($this->securityContext->getToken()->getUser())
+        $record->setUser($user)
             ->setCreatedAt(new \DateTime())
             ->setTitle($title)
             ->setContent($content);
@@ -82,9 +57,7 @@ abstract class ActivityRecordManager implements ActivityRecordManagerInterface
     }
 
     /**
-     * Creates an empty record instance.
-     *
-     * @return ActivityRecordInterface
+     * {@inheritdoc}
      */
     public function createRecord()
     {

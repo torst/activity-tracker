@@ -19,6 +19,7 @@ use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Metadata\MetadataFactory;
 use Symfony\Component\Templating\EngineInterface;
+use Symfony\Component\Security\Core\SecurityContextInterface;
 
 /* Local Imports */
 use UCS\Component\ActivityTracker\Annotation\TrackedEntity;
@@ -45,15 +46,22 @@ class TrackedEntityEventSubscriber implements EventSubscriber
     private $recordManager;
 
     /**
+     * @var SecurityContextInterface
+     */
+    private $securityContext;
+
+    /**
      * Constructor
      *
+     * @param SecurityContextInterface       $securityContext
      * @param EngineInterface                $templating   
      * @param ActivityRecordManagerInterface $recordManager
      */
-    public function __construct(EngineInterface $templating, ActivityRecordManagerInterface $recordManager)
+    public function __construct(SecurityContextInterface $securityContext, EngineInterface $templating, ActivityRecordManagerInterface $recordManager)
     {
         $this->templating = $templating;
         $this->recordManager = $recodManager;
+        $this->securityContext = $securityContext;
     }
 
     /**
@@ -158,6 +166,6 @@ class TrackedEntityEventSubscriber implements EventSubscriber
         $title = $template->render($titleTemplate, $context);
         $content = $template->render($contentTemplate, $context);
 
-        return $this->recordManager->createRecordFrom($title, $content);
+        return $this->recordManager->createRecordFrom($title, $content, $this->securityContext->getToken()->getUser());
     }
 }
