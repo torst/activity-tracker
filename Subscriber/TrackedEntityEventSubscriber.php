@@ -18,7 +18,7 @@ use Doctrine\Common\EventArgs;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Metadata\MetadataFactory;
-use Symfony\Component\Templating\EngineInterface;
+//use Symfony\Component\Templating\EngineInterface;
 //use Symfony\Component\Security\Core\SecurityContextInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -26,7 +26,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use UCS\Component\ActivityTracker\Annotation\TrackedEntity;
 use UCS\Component\ActivityTracker\Metadata\ClassMetadata;
 use UCS\Component\ActivityTracker\Metadata\Driver\AnnotationDriver;
-use UCS\Component\ActivityTracker\ActivityRecordManagerInterface;
+//use UCS\Component\ActivityTracker\ActivityRecordManagerInterface;
 
 /**
  * Event Subscriber for Doctrine events
@@ -35,17 +35,6 @@ use UCS\Component\ActivityTracker\ActivityRecordManagerInterface;
  */
 class TrackedEntityEventSubscriber implements EventSubscriber
 {
-
-    /**
-     * @var EngineInterface
-     */
-    private $templating;
-
-    /**
-     * @var ActivityRecordManagerInterface
-     */
-    private $recordManager;
-
     /**
      * @var ContainerInterface
      */
@@ -55,13 +44,9 @@ class TrackedEntityEventSubscriber implements EventSubscriber
      * Constructor
      *
      * @param ContainerInterface             $container
-     * @param EngineInterface                $templating   
-     * @param ActivityRecordManagerInterface $recordManager
      */
-    public function __construct(ContainerInterface $container, EngineInterface $templating, ActivityRecordManagerInterface $recordManager)
+    public function __construct(ContainerInterface $container)
     {
-        $this->templating = $templating;
-        $this->recordManager = $recodManager;
         $this->container = $container;
     }
 
@@ -81,42 +66,45 @@ class TrackedEntityEventSubscriber implements EventSubscriber
      * Looks for translatable objects being inserted or updated
      * for further processing
      *
-     * @param EventArgs $args
+     * @param EventArgs $eventArgs
      */
-    public function onFlush(EventArgs $args)
+    public function onFlush(EventArgs $eventArgs)
     {
         $om = $eventArgs->getEntityManager();
-        $uow = $em->getUnitOfWork();
+        $uow = $om->getUnitOfWork();
 
         // check all scheduled inserts for Tracked Entities objects
-        foreach ($ea->getScheduledObjectInsertions($uow) as $object) {
+        foreach ($uow->getScheduledEntityInsertions() as $object) {
             $meta = $om->getClassMetadata(get_class($object));
             $record = $this->manageActivityRecord($object, $meta, 'create');
 
             if (null !== $record) {
                 $newMeta = $om->getClassMetadata(get_class($record));
+                $om->persist($record);
                 $uow->computeChangeSet($newMeta, $record);
             }
         }
 
         // check all scheduled updates for Tracked Entities entities
-        foreach ($ea->getScheduledObjectUpdates($uow) as $object) {
+        foreach ($uow->getScheduledEntityUpdates() as $object) {
             $meta = $om->getClassMetadata(get_class($object));
             $this->manageActivityRecord($meta, 'update');
 
             if (null !== $record) {
                 $newMeta = $om->getClassMetadata(get_class($record));
+                $om->persist($record);
                 $uow->computeChangeSet($newMeta, $record);
             }
         }
 
         // check scheduled deletions for Tracked Entities entities
-        foreach ($ea->getScheduledObjectDeletions($uow) as $object) {
+        foreach ($uow->getScheduledEntityDeletions() as $object) {
             $meta = $om->getClassMetadata(get_class($object));
             $this->manageActivityRecord($meta, 'delete');
 
             if (null !== $record) {
                 $newMeta = $om->getClassMetadata(get_class($record));
+                $om->persist($record);
                 $uow->computeChangeSet($newMeta, $record);
             }
         }
@@ -146,13 +134,20 @@ class TrackedEntityEventSubscriber implements EventSubscriber
      */
     private function manageActivityRecord($object, ClassMetadataInfo $meta, $event)
     {
+
+
+        $securityContext = $this->container->get('security.context');
+        $templating = $this->container->get('templating');
+        $recordManager = $this->container->get('ucs.activity_record_manager');
+        $user = $securityContext->getToken()->getUser();
+
         $metadata = $this
             ->getFactory()
             ->getMetadataForClass($meta->name);
 
         $events = $metadata->getEvents();
         $titleTemplate = $metadata->getTitleTemplate();
-        $contentTemplate = $metadat->getContentTemplate();
+        $contentTemplate = $metadata->getContentTemplate();
 
         if (!in_array("all", $events) && !in_array($event, $events)) {
             return;
@@ -161,14 +156,13 @@ class TrackedEntityEventSubscriber implements EventSubscriber
         // Render the record properly
         $context = array(
             'entity' => $object,
-            'envent' => $event,
+            'event' => $event,
+            'user' => $user,
         );
 
-        $securityContext = $this->get('security.context');
+        $title = $templating->render($titleTemplate, $context);
+        $content = $templating->render($contentTemplate, $context);
 
-        $title = $template->render($titleTemplate, $context);
-        $content = $template->render($contentTemplate, $context);
-
-        return $this->recordManager->createRecordFrom($title, $content, $securityContext->getToken()->getUser());
+        return $recordManager->createRecordFrom($title, $content, $user);
     }
 }
