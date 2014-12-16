@@ -31,10 +31,10 @@ final class TrackedEntity extends Annotation
     /** 
      * @var string
      */
-    public $view;
+    public $contentTemplate;
 
     /** 
      * @var string
      */
-    public $label;
+    public $titleTemplate;
 }

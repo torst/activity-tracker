@@ -63,6 +63,25 @@ abstract class ActivityRecordManager implements ActivityRecordManagerInterface
     }
 
     /**
+     * Create a new record from the given title and content
+     *
+     * @param string $title  
+     * @param string $content
+     *
+     * @return ActivityRecord
+     */
+    public function createRecordFrom($title, $content)
+    {
+        $record = $this->createRecord();
+        $record->setUser($this->securityContext->getToken()->getUser())
+            ->setCreatedAt(new \DateTime())
+            ->setTitle($title)
+            ->setContent($content);
+
+        return $record;
+    }
+
+    /**
      * Creates an empty record instance.
      *
      * @return ActivityRecordInterface
