@@ -88,7 +88,7 @@ class TrackedEntityEventSubscriber implements EventSubscriber
         // check all scheduled updates for Tracked Entities entities
         foreach ($uow->getScheduledEntityUpdates() as $object) {
             $meta = $om->getClassMetadata(get_class($object));
-            $this->manageActivityRecord($meta, 'update');
+            $record = $this->manageActivityRecord($object, $meta, 'update');
 
             if (null !== $record) {
                 $newMeta = $om->getClassMetadata(get_class($record));
@@ -100,7 +100,7 @@ class TrackedEntityEventSubscriber implements EventSubscriber
         // check scheduled deletions for Tracked Entities entities
         foreach ($uow->getScheduledEntityDeletions() as $object) {
             $meta = $om->getClassMetadata(get_class($object));
-            $this->manageActivityRecord($meta, 'delete');
+            $record = $this->manageActivityRecord($object, $meta, 'delete');
 
             if (null !== $record) {
                 $newMeta = $om->getClassMetadata(get_class($record));
