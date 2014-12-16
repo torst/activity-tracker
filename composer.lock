@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "2f960a1d4be177fdb092adc3f84b036e",
+    "hash": "60c0c1d91650e680168dc817b7cbccef",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -748,6 +748,62 @@
             "description": "Symfony Debug Component",
             "homepage": "http://symfony.com",
             "time": "2014-12-12 16:23:01"
+        },
+        {
+            "name": "symfony/dependency-injection",
+            "version": "2.3.x-dev",
+            "target-dir": "Symfony/Component/DependencyInjection",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/DependencyInjection.git",
+                "reference": "21f7f40c000fd02c13e890abf1a57ae5f39e13d4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/DependencyInjection/zipball/21f7f40c000fd02c13e890abf1a57ae5f39e13d4",
+                "reference": "21f7f40c000fd02c13e890abf1a57ae5f39e13d4",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3"
+            },
+            "require-dev": {
+                "symfony/config": "~2.2",
+                "symfony/yaml": "~2.1"
+            },
+            "suggest": {
+                "symfony/config": "",
+                "symfony/proxy-manager-bridge": "Generate service proxies to lazy load them",
+                "symfony/yaml": ""
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.3-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Symfony\\Component\\DependencyInjection\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Symfony Community",
+                    "homepage": "http://symfony.com/contributors"
+                },
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                }
+            ],
+            "description": "Symfony DependencyInjection Component",
+            "homepage": "http://symfony.com",
+            "time": "2014-12-15 10:45:17"
         },
         {
             "name": "symfony/event-dispatcher",

@@ -19,7 +19,8 @@ use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Metadata\MetadataFactory;
 use Symfony\Component\Templating\EngineInterface;
-use Symfony\Component\Security\Core\SecurityContextInterface;
+//use Symfony\Component\Security\Core\SecurityContextInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /* Local Imports */
 use UCS\Component\ActivityTracker\Annotation\TrackedEntity;
@@ -46,22 +47,22 @@ class TrackedEntityEventSubscriber implements EventSubscriber
     private $recordManager;
 
     /**
-     * @var SecurityContextInterface
+     * @var ContainerInterface
      */
-    private $securityContext;
+    private $container;
 
     /**
      * Constructor
      *
-     * @param SecurityContextInterface       $securityContext
+     * @param ContainerInterface             $container
      * @param EngineInterface                $templating   
      * @param ActivityRecordManagerInterface $recordManager
      */
-    public function __construct(SecurityContextInterface $securityContext, EngineInterface $templating, ActivityRecordManagerInterface $recordManager)
+    public function __construct(ContainerInterface $container, EngineInterface $templating, ActivityRecordManagerInterface $recordManager)
     {
         $this->templating = $templating;
         $this->recordManager = $recodManager;
-        $this->securityContext = $securityContext;
+        $this->container = $container;
     }
 
     /**
@@ -163,9 +164,11 @@ class TrackedEntityEventSubscriber implements EventSubscriber
             'envent' => $event,
         );
 
+        $securityContext = $this->get('security.context');
+
         $title = $template->render($titleTemplate, $context);
         $content = $template->render($contentTemplate, $context);
 
-        return $this->recordManager->createRecordFrom($title, $content, $this->securityContext->getToken()->getUser());
+        return $this->recordManager->createRecordFrom($title, $content, $securityContext->getToken()->getUser());
     }
 }
