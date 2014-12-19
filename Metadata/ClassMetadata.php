@@ -37,7 +37,7 @@ class ClassMetadata extends MergeableClassMetadata
     /**
      * @var array
      */
-    protected $events;
+    protected $events = array();
 
     /**
      * Merge with the given metadata
@@ -121,7 +121,7 @@ class ClassMetadata extends MergeableClassMetadata
      */
     public function setEvents(array $events)
     {
-        $this->events = $events;
+        $this->events = (array) $events;
         
         return $this;
     }

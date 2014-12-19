@@ -149,7 +149,7 @@ class TrackedEntityEventSubscriber implements EventSubscriber
         $titleTemplate = $metadata->getTitleTemplate();
         $contentTemplate = $metadata->getContentTemplate();
 
-        if (!in_array("all", $events) && !in_array($event, $events)) {
+        if (!in_array("all", (array) $events) && !in_array($event, (array) $events)) {
             return;
         }
 
