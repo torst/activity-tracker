@@ -139,7 +139,13 @@ class TrackedEntityEventSubscriber implements EventSubscriber
         $securityContext = $this->container->get('security.context');
         $templating = $this->container->get('templating');
         $recordManager = $this->container->get('ucs.activity_record_manager');
+
+        if($securityContext->getToken() == null)
+            return;
         $user = $securityContext->getToken()->getUser();
+
+        if($user == null)
+            return;
 
         $metadata = $this
             ->getFactory()
