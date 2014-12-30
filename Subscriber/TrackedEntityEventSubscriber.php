@@ -59,9 +59,31 @@ class TrackedEntityEventSubscriber implements EventSubscriber
     {
         return array(
             'onFlush',
+            'postPersist'
         );
     }
 
+    /**
+     * Looks for translatable objects being inserted or updated
+     * for further processing
+     *
+     * @param EventArgs $eventArgs
+     */
+    public function postPersist(EventArgs $eventArgs) 
+    {
+        $om = $eventArgs->getEntityManager();
+        $uow = $om->getUnitOfWork();
+        $entity = $eventArgs->getEntity();
+
+        $meta = $om->getClassMetadata(get_class($entity));
+        $record = $this->manageActivityRecord($entity, $meta, 'create');
+        if (null !== $record) {
+            $newMeta = $om->getClassMetadata(get_class($record));
+            $om->persist($record);
+            $om->flush();
+        }
+
+    }
     /**
      * Looks for translatable objects being inserted or updated
      * for further processing
@@ -73,17 +95,6 @@ class TrackedEntityEventSubscriber implements EventSubscriber
         $om = $eventArgs->getEntityManager();
         $uow = $om->getUnitOfWork();
 
-        // check all scheduled inserts for Tracked Entities objects
-        foreach ($uow->getScheduledEntityInsertions() as $object) {
-            $meta = $om->getClassMetadata(get_class($object));
-            $record = $this->manageActivityRecord($object, $meta, 'create');
-
-            if (null !== $record) {
-                $newMeta = $om->getClassMetadata(get_class($record));
-                $om->persist($record);
-                $uow->computeChangeSet($newMeta, $record);
-            }
-        }
 
         // check all scheduled updates for Tracked Entities entities
         foreach ($uow->getScheduledEntityUpdates() as $object) {
